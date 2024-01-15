@@ -1,0 +1,172 @@
+{% extends "base.html.twig" %} 
+{% block title %} Star Wars - Personajes {%endblock %} 
+{% block body %}
+<div class="container">
+ <div class="my-3">
+    <label for="pagina" class="text-center offset-lg-11 col-1 col-form-label">Página</label>
+    <div class="col-lg-1 offset-lg-11">
+      <input type="text" class="form-control" id="paginaInput" value="1">
+    </div>
+  </div>
+    <table class="table table-responsive">
+    <thead>
+        <th>Nombre</th>
+
+        <th>Altura</th>
+
+        <th>Peso</th>
+
+        <th>Pelo</th>
+
+        <th>Color de Piel</th>
+
+        <th>Color de Ojos</th>
+
+        <th>Año Nacimiento</th>
+
+        <th>Género</th>
+
+        <th>Planeta de origen</th>
+
+        <th>Peliculas</th>
+        
+        <th>Especies</th>
+
+        <th>Vehiculos</th>
+
+        <th>Naves</th>
+
+        <th>Página</th>
+
+    </thead>
+    <tbody id="charTable">
+
+    </tbody>
+
+    
+    </table>
+</div>
+{% endblock %} 
+
+{% block scripts %}
+<script>
+
+    document.querySelector('#paginaInput').addEventListener('change', updateTable);
+
+    function updateTable() {
+    // tu código aquí
+    let pagina = document.querySelector("#paginaInput").value;
+    getServerDataAndDraw(pagina)
+    }  
+
+    function createButton(link, key, number){
+        let a = document.createElement("a");
+
+        a.href = link;
+        a.target = "_blank";
+
+        let btn = document.createElement("button");
+        btn.className = "btn btn-primary my-1";
+        btn.textContent = number != undefined ? key+" "+number : key;
+
+        a.appendChild(btn);
+        return a;
+    }
+    function drawTR(character){
+
+       
+        const tr = document.createElement("tr");
+        for (let key in character) {
+            if(["created","edited"].includes(key)) continue;
+            let td = document.createElement("td");
+
+            switch(typeof character[key]){
+                case "string":
+                    if(character[key].startsWith('http')){
+                        //si es un link hacemos que sea un boton
+                        td.appendChild(createButton(character[key],key))
+
+                    }else{
+                        td.textContent = character[key];
+                    }
+                break;
+
+                case "object":
+                    let buttons = character[key].map((data,pos)=>{
+                        return createButton(data,key,pos)
+                    })
+                    if(buttons.length == 0 ){
+                        td.textContent = "n/a";
+                    }else{
+                        td.replaceChildren(...buttons)
+                    }
+                break;
+
+                default:
+                        td.textContent = "n/a";
+                break;
+            }
+            tr.appendChild(td);
+        }
+        return tr;
+    }
+
+
+
+    function drawTable(characters){
+        let rows = characters.map(character=>{
+            return drawTR(character);
+        })
+      
+        document.querySelector("#charTable").replaceChildren(...rows);
+    }
+
+    function getServerDataAndDraw(page){
+    // Crear el elemento de carga
+    document.querySelector("#charTable").replaceChildren();
+    let loadingElement = document.createElement('div');
+    loadingElement.id = 'loading';
+    loadingElement.innerHTML = 'Cargando...';
+    loadingElement.className = "w-100 h-100 fs-2 fw-bold bg-secondary text-white position-absolute top-0 start-0 justify-content-center align-items-center";    
+    loadingElement.style.display = "flex";
+    loadingElement.style.opacity = 0.5;
+    document.body.appendChild(loadingElement);
+
+    // Deshabilitar la interacción del usuario
+    document.body.style.pointerEvents = 'none';
+
+    //Si se especifico una pagina, vamos a esa, sino, buscamos todos los personajes
+    let url = page ? '/api/v1/characters/page/' + page : '/api/v1/characters/all';
+
+    let xhr = new XMLHttpRequest();
+
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+            // Ocultar el elemento de carga
+            loadingElement.style.display = 'none';
+
+            // Habilitar la interacción del usuario
+            document.body.style.pointerEvents = 'auto';
+
+            let response = JSON.parse(xhr.responseText);
+            if(xhr.status!=200) {
+                return Toastify({
+                    text: "El servidor devolvio el siguiente error: "+response.error,
+                    duration: 3000,
+                    style: {
+                        background: "linear-gradient(to right, #ff5f6d, #ffc371)"
+                    }
+                }).showToast();
+            }
+            drawTable(response.results);
+        }
+    };
+    xhr.send();
+}
+
+    getServerDataAndDraw(1)
+</script>
+{% endblock %}
