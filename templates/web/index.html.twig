@@ -151,13 +151,13 @@ function getServerDataAndDraw(page){
         return response.json();
     })
     .then(data => {
-        // Ocultar el elemento de carga
-        loadingElement.style.display = 'none';
-
-        // Habilitar la interacción del usuario
-        document.body.style.pointerEvents = 'auto';
-
         if(data.error) {
+            throw new Error("Endpoint not working")
+        }
+        drawTable(data.results);
+    })
+    .catch(error => {
+  
             return Toastify({
                 text: "El servidor devolvio el siguiente error: "+data.error,
                 duration: 3000,
@@ -165,12 +165,14 @@ function getServerDataAndDraw(page){
                     background: "linear-gradient(to right, #ff5f6d, #ffc371)"
                 }
             }).showToast();
-        }
-        drawTable(data.results);
-    })
-    .catch(error => {
         console.error('There has been a problem with your fetch operation:', error);
-    });
+    }).finally(_=>{
+              // Ocultar el elemento de carga
+            loadingElement.style.display = 'none';
+
+            // Habilitar la interacción del usuario
+            document.body.style.pointerEvents = 'auto';
+    })
 }
 
 
