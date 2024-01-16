@@ -9,6 +9,7 @@ APP_DEBUG=0
 APP_SECRET=ExampleSecret
 APP_URL_STRING=http://localhost #Esto es simplemente para mostrar en los resultados de la API
 ```
+
 **Ejecutar el comando**
 ```bash
 docker-compose up -d
@@ -17,6 +18,19 @@ docker-compose up -d
 Para detener el contenedor simplemente usar
 ```bash
 docker-compose down
+```
+
+### Opcional
+Si se quiere cambiar el puerto en el que escucha el contenedor, simplemente editar el archivo docker-compose.yml
+```yml
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - NuevoPuerto:80
+    env_file:
+      - .env.prod
 ```
 
 ## Apache

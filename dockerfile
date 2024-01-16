@@ -5,9 +5,8 @@ FROM php:8.2-apache
 RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
+    git \
  && docker-php-ext-install zip
-
-RUN apt-get update && apt-get install -y git
 
 ENV COMPOSER_ALLOW_SUPERUSER 1
 
