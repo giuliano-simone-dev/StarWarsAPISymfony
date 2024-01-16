@@ -9,3 +9,8 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+
+/.dockerignore
+/docker-compose.yml
+/dockerfile
