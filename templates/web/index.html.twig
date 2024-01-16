@@ -121,7 +121,7 @@
         document.querySelector("#charTable").replaceChildren(...rows);
     }
 
-    function getServerDataAndDraw(page){
+function getServerDataAndDraw(page){
     // Crear el elemento de carga
     document.querySelector("#charTable").replaceChildren();
     let loadingElement = document.createElement('div');
@@ -138,34 +138,41 @@
     //Si se especifico una pagina, vamos a esa, sino, buscamos todos los personajes
     let url = page ? '/api/v1/characters/page/' + page : '/api/v1/characters/all';
 
-    let xhr = new XMLHttpRequest();
-
-    xhr.open('POST', url, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4) {
-            // Ocultar el elemento de carga
-            loadingElement.style.display = 'none';
-
-            // Habilitar la interacción del usuario
-            document.body.style.pointerEvents = 'auto';
-
-            let response = JSON.parse(xhr.responseText);
-            if(xhr.status!=200) {
-                return Toastify({
-                    text: "El servidor devolvio el siguiente error: "+response.error,
-                    duration: 3000,
-                    style: {
-                        background: "linear-gradient(to right, #ff5f6d, #ffc371)"
-                    }
-                }).showToast();
-            }
-            drawTable(response.results);
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
         }
-    };
-    xhr.send();
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Ocultar el elemento de carga
+        loadingElement.style.display = 'none';
+
+        // Habilitar la interacción del usuario
+        document.body.style.pointerEvents = 'auto';
+
+        if(data.error) {
+            return Toastify({
+                text: "El servidor devolvio el siguiente error: "+data.error,
+                duration: 3000,
+                style: {
+                    background: "linear-gradient(to right, #ff5f6d, #ffc371)"
+                }
+            }).showToast();
+        }
+        drawTable(data.results);
+    })
+    .catch(error => {
+        console.error('There has been a problem with your fetch operation:', error);
+    });
 }
+
 
     getServerDataAndDraw(1)
 </script>
