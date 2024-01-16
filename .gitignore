@@ -14,3 +14,5 @@
 /.dockerignore
 /docker-compose.yml
 /dockerfile
+
+/.env.prod
