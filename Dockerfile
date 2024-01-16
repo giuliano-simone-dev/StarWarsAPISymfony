@@ -1,8 +1,19 @@
 # Usar una imagen de PHP con Apache
 FROM php:8.2-apache
 
+
+RUN apt-get update && apt-get install -y \
+    unzip \
+    libzip-dev \
+ && docker-php-ext-install zip
+
+RUN apt-get update && apt-get install -y git
+
+ENV COMPOSER_ALLOW_SUPERUSER 1
+
 # Habilitar el módulo de reescritura de Apache para Symfony
 RUN a2enmod rewrite
+
 
 RUN echo '<VirtualHost *:80>\n\
     DocumentRoot /var/www/html/public\n\
